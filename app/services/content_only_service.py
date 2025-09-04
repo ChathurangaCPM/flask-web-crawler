@@ -44,7 +44,7 @@ class ContentOnlyExtractor:
         ]
     
     def clean_html(self, html_content: str) -> str:
-        """Clean HTML and extract only text content"""
+        """Clean HTML and extract only text content without duplication"""
         try:
             soup = BeautifulSoup(html_content, 'html.parser')
             
@@ -82,24 +82,25 @@ class ContentOnlyExtractor:
             else:
                 content_soup = soup.find('body') or soup
             
-            # Extract text with proper spacing
-            text_parts = []
-            for element in content_soup.descendants:
-                if element.name in self.block_tags and element.get_text(strip=True):
-                    text_parts.append(element.get_text(strip=True))
-                elif element.string and element.string.strip():
-                    parent_tag = element.parent.name if element.parent else None
-                    if parent_tag not in self.remove_tags:
-                        text_parts.append(element.string.strip())
+            # New approach: Extract text using get_text() with separator and clean up
+            # This avoids the duplication issue by using BeautifulSoup's built-in text extraction
+            raw_text = content_soup.get_text(separator=' ', strip=True)
             
-            # Join text parts and clean up
-            content = ' '.join(text_parts)
+            # Clean up the extracted text
+            # Remove extra whitespace
+            content = re.sub(r'\s+', ' ', raw_text)
             
-            # Clean up extra whitespace
-            content = re.sub(r'\s+', ' ', content)
-            content = re.sub(r'\n\s*\n', '\n\n', content)
+            # Remove common unwanted patterns
+            content = re.sub(r'\s*\|\s*', ' ', content)  # Remove pipe separators
+            content = re.sub(r'\s*›\s*', ' ', content)   # Remove breadcrumb separators
+            content = re.sub(r'\s*»\s*', ' ', content)   # Remove breadcrumb separators
+            content = re.sub(r'\s*>\s*', ' ', content)   # Remove breadcrumb separators
             
-            return content.strip()
+            # Clean up multiple spaces and normalize
+            content = re.sub(r'\s{2,}', ' ', content)
+            content = content.strip()
+            
+            return content
             
         except Exception as e:
             logger.error(f"Error cleaning HTML: {str(e)}")
