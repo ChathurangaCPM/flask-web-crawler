@@ -12,8 +12,9 @@
 4. [Content-Only Extraction](#-content-only-extraction)
 5. [Selective Content Extraction](#-selective-content-extraction)
 6. [Array-Based Content Extraction](#-array-based-content-extraction)
-7. [Error Handling](#-error-handling)
-8. [Code Examples](#-code-examples)
+7. [E-commerce Product Scraping](#-e-commerce-product-scraping)
+8. [Error Handling](#-error-handling)
+9. [Code Examples](#-code-examples)
 
 ---
 
@@ -718,6 +719,186 @@ X-API-Key: your-api-key-here
 **Rate Limit:** 60/minute
 
 **Response includes:** Service status, usage examples, configuration guide, output formats
+
+---
+
+## 🛒 E-commerce Product Scraping
+
+### 1. Custom E-commerce Product Scraping
+**Endpoint:** `POST /api/v1/ecommerce/scrape`  
+**Rate Limit:** 10/minute
+
+**Perfect for:** Product listings, shopping sites, marketplace pages
+
+**Request Body:**
+```json
+{
+  "url": "https://shop.example.com/products",
+  "product_selector": ".product-item",
+  "selectors": {
+    "title": "h3 a, .product-title",
+    "price": ".price, .cost",
+    "original_price": ".was-price, .old-price",
+    "image": "img",
+    "link": "a",
+    "rating": ".rating, .stars",
+    "reviews": ".review-count",
+    "brand": ".brand",
+    "availability": ".stock-status",
+    "discount": ".discount-badge"
+  },
+  "config": {
+    "limit": 50,
+    "exclude_selectors": [".ads", ".sponsored"]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://shop.example.com/products",
+    "product_selector": ".product-item",
+    "total_products": 25,
+    "products": [
+      {
+        "index": 0,
+        "title": "Premium Wireless Headphones",
+        "price": "$129.99",
+        "original_price": "$199.99",
+        "image": "https://shop.example.com/images/headphones.jpg",
+        "link": "https://shop.example.com/product/headphones-123",
+        "rating": "4.5/5",
+        "reviews": "1,234 reviews",
+        "brand": "AudioTech",
+        "availability": "In Stock",
+        "discount": "35% OFF",
+        "word_count": 3
+      },
+      {
+        "index": 1,
+        "title": "Smart Fitness Watch",
+        "price": "$89.99",
+        "original_price": "$149.99",
+        "image": "https://shop.example.com/images/watch.jpg",
+        "link": "https://shop.example.com/product/watch-456",
+        "rating": "4.2/5",
+        "reviews": "856 reviews",
+        "brand": "FitTech",
+        "availability": "Limited Stock",
+        "discount": "40% OFF",
+        "word_count": 3
+      }
+    ],
+    "extraction_info": {
+      "field_selectors_used": ["title", "price", "original_price", "image", "link", "rating", "reviews", "brand", "availability", "discount"],
+      "exclude_selectors_used": [".ads", ".sponsored"],
+      "extraction_time": 3.2,
+      "order_preserved": true,
+      "urls_absolute": true,
+      "deduplication_applied": true,
+      "total_found": 27,
+      "total_extracted": 25,
+      "extraction_method": "ecommerce_optimized"
+    }
+  }
+}
+```
+
+### 2. Auto-Detect E-commerce Products
+**Endpoint:** `POST /api/v1/ecommerce/auto-scrape`  
+**Rate Limit:** 8/minute
+
+**Features:**
+- Automatically detects product containers
+- Extracts common e-commerce fields
+- Smart price and rating extraction
+- No manual selector configuration needed
+
+**Request Body:**
+```json
+{
+  "url": "https://shop.example.com/products",
+  "config": {
+    "limit": 30
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://shop.example.com/products",
+    "total_products": 18,
+    "products": [
+      {
+        "index": 0,
+        "title": "Smartphone Pro Max",
+        "price": "$899.99",
+        "original_price": "$1,199.99",
+        "image": "https://shop.example.com/images/phone.jpg",
+        "link": "https://shop.example.com/product/phone-789",
+        "rating": "4.8",
+        "reviews": "2,341",
+        "brand": "TechCorp",
+        "availability": "In Stock",
+        "discount": "25%",
+        "description": "Latest flagship smartphone with advanced features",
+        "word_count": 3
+      }
+    ],
+    "extraction_info": {
+      "mode": "auto_detection",
+      "extraction_time": 2.8,
+      "order_preserved": true,
+      "urls_absolute": true,
+      "fields_detected": ["title", "price", "original_price", "image", "link", "rating", "reviews", "brand", "availability", "discount", "description"],
+      "total_found": 20,
+      "total_extracted": 18,
+      "extraction_method": "auto_detect"
+    }
+  }
+}
+```
+
+### 3. E-commerce Demo & Documentation
+**Endpoint:** `GET /api/v1/ecommerce/demo`  
+**Rate Limit:** 30/minute
+
+**Response includes:**
+- API overview and features
+- Request/response examples
+- Common CSS selectors for e-commerce sites
+- Python/JavaScript usage examples
+- Best practices and tips
+
+### Key Features of E-commerce Scraping
+
+#### Smart Field Detection
+- **Price Extraction**: Handles various currency formats ($, £, €, ¥, ₹)
+- **Rating Extraction**: Supports different rating formats (4.5/5, 4.5 stars, etc.)
+- **Image URLs**: Automatically converts to absolute URLs
+- **Link URLs**: Product links made absolute for direct access
+
+#### Supported E-commerce Fields
+- **Basic**: title, price, original_price, image, link
+- **Advanced**: rating, reviews, brand, availability, discount, description
+- **Custom**: Any field with corresponding CSS selector
+
+#### Common E-commerce Selectors
+```json
+{
+  "product_containers": [".product", ".item", ".card", ".product-item", ".product-card"],
+  "titles": ["h1", "h2", "h3", ".product-title", ".title", ".name"],
+  "prices": [".price", ".cost", ".amount", ".product-price"],
+  "images": ["img", ".product-image img", ".item-image img"],
+  "links": ["a", ".product-link", ".item-link"]
+}
+```
 
 ---
 
